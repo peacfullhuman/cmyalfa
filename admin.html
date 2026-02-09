@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>admin</title>
+  <link rel="icon" href="cover/small-logo.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/adm-style.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    h2 { color: #333; }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <a href="/">Главная</a>
+    <button class="open-btn msg-btn active" onclick="showBlock('msg')">Заявки клиентов</button>
+    <button class="open-btn gal-btn" onclick="showBlock('gal')">Галерея</button>
+    <button class="open-btn new-btn" onclick="showBlock('new')">Новости</button>
+  </div>
+
+  <div class="block-display" id="passwordOverlay">
+    <div class="password-window">
+      <label for="pass">Пароль:</label>
+      <input type="password" id="pass" name="pass">
+      <button type="button" onclick="checkPassword()">Продолжить</button>
+    </div>
+  </div>
+
+  <!-- прием формы, отображение -->
+  <div class="fullscreen-block messages-adm-wrapper active" id="msg">
+    <h2>Заявки клиентов</h2>
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Телефон</th>
+          <th>Email</th>
+          <th>Категория</th>
+          <th>Сообщение</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Данные будут вставлены сюда -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- блок настройки галереи -->
+  <div class="fullscreen-block galer-adm-wrapper" id="gal">
+    <h2>Загрузить картинку</h2>
+      <form action="/upload-image" method="post" enctype="multipart/form-data">
+        <p>Класс картинки:
+          <select name="class" required>
+            <option value="electro">Электромонтажные работы</option>
+            <option value="panels">Монтаж щитков</option>
+            <option value="video">Видеонаблюдение</option>
+            <option value="fire">Противопожарные системы безопасности</option>
+            <option value="signal">Охранные системы сигнализации</option>
+          </select>
+        </p>
+        <p>Файл: <input type="file" name="image" accept="image/*" required></p>
+        <button type="submit">Загрузить</button>
+      </form>
+
+      <h2>Галерея</h2>
+        <div id="file-list">
+        <p>Загружаю файлы...</p>
+      </div>
+  </div>
+
+
+  <!-- НОВОСТИ -->
+  <div class="fullscreen-block news-adm-blocb" id="new">
+    <!-- add-news.html -->
+    <form action="/add-news" method="POST" enctype="multipart/form-data">
+
+        <!-- Скрытое поле: класс загрузки -->
+      <input type="hidden" name="class" value="news">
+
+      <label>Заголовок:<br>
+        <input type="text" name="title" required>
+      </label><br><br>
+
+      <label>Анонс:<br>
+        <textarea name="preview" rows="3" required></textarea>
+      </label><br><br>
+
+      <label>Полный текст:<br>
+        <textarea name="content" rows="6" required></textarea>
+      </label><br><br>
+
+        <!-- Множественная загрузка фото -->
+      <label>Фото (несколько):<br>
+        <input type="file" name="images" accept="image/*" multiple required>
+      </label><br><br>
+
+      <label>Дата:<br>
+        <input type="date" name="date" required>
+      </label><br><br>
+
+      <button type="submit">Добавить новость</button>
+    </form>
+
+
+    <div class="all-news">
+      <h3>Список новостей</h3>
+      <div class="news-list">
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- <script>
+    const CORRECT_PASSWORD = '12345';
+
+    function checkPassword() {
+      const input = document.getElementById('pass');
+      const password = input.value;
+
+      if (password === CORRECT_PASSWORD) {
+      // Скрываем окно
+        document.getElementById('passwordOverlay').style.display = 'none';
+      // Можно сохранить факт входа в localStorage
+        // localStorage.setItem('auth', 'true');
+      } else {
+        alert('❌ Неверный пароль');
+        input.value = ''; // очищаем
+        input.focus();
+      }
+    }
+
+  // При загрузке страницы — проверим, был ли уже ввод пароля
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('auth') === 'true') {
+        document.getElementById('passwordOverlay').style.display = 'none';
+      }
+    });
+
+    // Загружаем данные с сервера
+    fetch('/data?t=' + Date.now())
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector('#data-table tbody');
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6">Нет данных</td></tr>';
+          return;
+        }
+
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.id}</td>
+            <td>${row.name || ''}</td>
+            <td>${row.phone || ''}</td>
+            <td>${row.email || ''}</td>
+            <td>${row.list || ''}</td>
+            <td>${row.messages || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        console.error('Ошибка загрузки данных:', err);
+        tbody.innerHTML = '<tr><td colspan="6">❌ Ошибка: не удалось загрузить данные</td></tr>';
+      });
+
+
+    fetch('/files')
+      .then(response => response.json())
+      .then(files => {
+        const container = document.getElementById('file-list');
+
+        if (files.length === 0) {
+          container.innerHTML = '<p>Нет картинок</p>';
+          return;
+        }
+
+        // Группировка по папкам
+        const grouped = {};
+        files.forEach(file => {
+          const folder = file.split('/').slice(2, -1).join('/') || 'корень';
+          if (!grouped[folder]) grouped[folder] = [];
+          grouped[folder].push(file);
+        });
+
+      // Создаём HTML
+        let html = '';
+        for (const [folder, imgs] of Object.entries(grouped)) {
+          html += `<h3>📁 ${folder || 'корень'}</h3>`;
+          html += `<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">`;
+          imgs.forEach(img => {
+            const filename = img.split('/').pop();
+            html += `
+              <div style="text-align: center; max-width: 150px;">
+                <img src="${img}" width="120" alt="${filename}" style="border-radius: 6px;">
+                <div style="font-size: 0.8em; color: #555; margin-top: 4px;">${filename}</div>
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        console.error('Ошибка:', err);
+        container.innerHTML = '<p>❌ Не удалось загрузить файлы</p>';
+      });
+  </script> -->
+</body>
+<script src="adm-script.js"></script>
+</html>

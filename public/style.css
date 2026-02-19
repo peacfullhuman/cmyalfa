@@ -32,7 +32,21 @@ header{
     border: solid 1px rgb(214, 214, 214);
 }
 
+/* .logo-name{
+    display: flex;
+    align-items: center;
+    height: 5vh;
+    gap: 1vh;
+} */
+
+.logo-name a img{
+    max-height: 5vh;
+}
+
 .logo-name a{
+    display: flex;
+    align-items: center;
+    gap: 1vh;
     text-decoration: none;
     color: black;
 }
@@ -937,10 +951,15 @@ footer {
 .business-name{
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     gap: 1vh;
     font-size: 24px;
     font-weight: bold;
     color: white;
+}
+
+.business-name img{
+    max-width: 3vh;
 }
 
 .bottom-services ul li a{
